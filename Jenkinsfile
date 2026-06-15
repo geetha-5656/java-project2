@@ -2,12 +2,6 @@ pipeline {
 	agent any
 
 	stages{
-		
-		stage('Checkout'){
-			steps{
-			   git 'https://github.com/geetha-5656/java-project2.git'
-		         }
-                }
 
 		stage('Build'){
                        steps{
