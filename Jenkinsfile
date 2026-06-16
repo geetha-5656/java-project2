@@ -14,14 +14,25 @@ pipeline {
                         sh 'mvn test -DskipTests'
                        }
                 }
-                
-		stage('Deploy'){
-                      steps{
-                        sh '''
-                        pkill -f 'java -jar' || true
-                        nohup java -jar target/*.jar > app.log 2>&1 &
-                        '''
+
+                stage('Archive Artifact'){
+                        steps{
+                          archiveArtifacts artifacts: 'target/*.jar'
+                        }
+                }
+                stage('Docker build'){
+                       steps {
+                          sh 'docker build -t petclinic .'
                        }
                 }
+                stage('Run Container'){
+                       steps{
+                           sh '''
+                           docker stop petclinic || true
+                           docker rm petclinic || true
+                           docker run -d --name petclinic -p 8080:8080 petclinic '''
+                        }
+                 }
+
          }
 }
