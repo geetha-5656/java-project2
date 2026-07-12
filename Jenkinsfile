@@ -1,6 +1,6 @@
 pipeline{
        agent{
-           label java
+           labe 'Java'
            }
         environment{
            IMAGE_NAME = "dockerpracticelab/petclinic"
@@ -11,23 +11,18 @@ pipeline{
            EC2_USER = "ubuntu"
            }
 
-          tools {
-              jdk 'JDK21'
-              maven 'Maven3'
-              }
-
            stages {
                stage ('Checkout'){
                 steps{
                   echo "Checking out source code.."
-                  git 'https://github.com/geetha-5656/java-project2.git', branch: 'main'
+                  git 'https://github.com/geetha-5656/java-project2.git'
                   }
             }
             
         stage('Build') {
             steps {
                 echo "Building application..."
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package'
             }
         }
 
@@ -112,4 +107,4 @@ pipeline{
             cleanWs()
         }
     }
-}
+i}
