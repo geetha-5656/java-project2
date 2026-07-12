@@ -15,7 +15,7 @@ pipeline{
                stage ('Checkout'){
                 steps{
                   echo "Checking out source code.."
-                  git 'https://github.com/geetha-5656/java-project2.git'
+                  git url: 'https://github.com/geetha-5656/java-project2.git'
                   }
             }
             
@@ -30,7 +30,7 @@ pipeline{
         stage('Unit Test') {
             steps {
                 echo "Running unit tests..."
-                sh 'mvn test -DskipTests'
+                sh 'mvn test'
             }
         }
 
@@ -109,3 +109,4 @@ pipeline{
         }
     }
 
+}
