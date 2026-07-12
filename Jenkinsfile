@@ -1,6 +1,6 @@
 pipeline{
        agent{
-           labe 'Java'
+           label 'Java'
            }
         environment{
            IMAGE_NAME = "dockerpracticelab/petclinic"
@@ -25,6 +25,7 @@ pipeline{
                 sh 'mvn clean package'
             }
         }
+
 
         stage('Unit Test') {
             steps {
@@ -107,4 +108,4 @@ pipeline{
             cleanWs()
         }
     }
-i}
+
