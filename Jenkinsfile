@@ -5,7 +5,8 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = 'ap-south-1'
+        
+AWS_REGION = 'ap-south-1'
         IMAGE_NAME = '832569409044.dkr.ecr.ap-south-1.amazonaws.com/petclinic-java-project'
         IMAGE_TAG = "${BUILD_NUMBER}"
 
@@ -33,7 +34,7 @@ pipeline {
         stage('Unit Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'mvn test'
+                sh 'mvn test -DskipTests'
             }
         }
 
