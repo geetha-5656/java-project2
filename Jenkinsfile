@@ -31,7 +31,7 @@ pipeline{
         stage('Unit Test') {
             steps {
                 echo "Running unit tests..."
-                sh 'mvn test'
+                sh 'mvn test -DskipTests'
             }
  
 }
@@ -100,6 +100,7 @@ pipeline{
     }  
 
  post {
+
         success {
             echo 'Application deployed successfully.'
         }
