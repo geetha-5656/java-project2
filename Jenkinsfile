@@ -1,45 +1,53 @@
-pipeline{
-       agent{
-           label 'Java'
-           }
-        environment{
-           IMAGE_NAME = "dockerpracticelab/petclinic"
-           IMAGE_TAG = "${BUILD_NUMBER}"
+pipeline {
 
+    agent {
+        label 'Java'
+    }
 
-           EC2_HOST = "13.201.204.209"
-           EC2_USER = "ubuntu"
-           }
+    environment {
+        AWS_REGION = 'ap-south-1'
+        IMAGE_NAME = '832569409044.dkr.ecr.ap-south-1.amazonaws.com/petclinic-java-project'
+        IMAGE_TAG = "${BUILD_NUMBER}"
 
-           stages {
-               stage ('Checkout'){
-                steps{
-                  echo "Checking out source code.."
-                  git branch: 'main',
-                      url: 'https://github.com/geetha-5656/java-project2.git'
-                  }
+        EC2_HOST = '13.201.204.209'
+        EC2_USER = 'ubuntu'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+                git branch: 'main',
+                    url: 'https://github.com/geetha-5656/java-project2.git'
             }
-            
+        }
+
         stage('Build') {
             steps {
-                echo "Building application..."
+                echo 'Building application...'
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-
         stage('Unit Test') {
             steps {
-                echo "Running unit tests..."
-                sh 'mvn test -DskipTests'
+                echo 'Running unit tests...'
+                sh 'mvn test'
             }
+        }
 
- 
-}
-
-         stage('Archive Artifact') {
+        stage('Archive Artifact') {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('Upload Artifact to S3') {
+            steps {
+                sh """
+                aws s3 cp target/*.jar s3://every-build-artifacts/petclinic/build-${BUILD_NUMBER}.jar
+                """
             }
         }
 
@@ -52,20 +60,16 @@ pipeline{
             }
         }
 
-        stage('Docker Login') {
+        stage('Login to Amazon ECR') {
             steps {
-            withCredentials([usernamePassword(
-            credentialsId: 'dockerhub',
-            usernameVariable: 'DOCKER_USER',
-            passwordVariable: 'DOCKER_PASS'
-        )]) {
-            sh '''
-            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-            '''
+                sh """
+                aws ecr get-login-password --region ${AWS_REGION} | \
+                docker login --username AWS --password-stdin 832569409044.dkr.ecr.ap-south-1.amazonaws.com
+                """
+            }
         }
-    }
-}
-     stage('Push Docker Image') {
+
+        stage('Push Docker Image to ECR') {
             steps {
                 sh """
                 docker push ${IMAGE_NAME}:${IMAGE_TAG}
@@ -74,45 +78,57 @@ pipeline{
             }
         }
 
-     stage('Deploy to EC2') {
+        stage('Deploy to EC2') {
             steps {
                 sshagent(credentials: ['application-server']) {
+
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
+                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+                    set -e
+
+                    aws ecr get-login-password --region ${AWS_REGION} | \
+                    docker login --username AWS --password-stdin 832569409044.dkr.ecr.ap-south-1.amazonaws.com
+
                     docker pull ${IMAGE_NAME}:latest
+
                     docker stop petclinic || true
                     docker rm petclinic || true
-                    docker run -d --name petclinic -p 8080:8080 --restart always ${IMAGE_NAME}:latest
-                    '
+
+                    docker run -d \
+                      --name petclinic \
+                      -p 8080:8080 \
+                      --restart always \
+                      ${IMAGE_NAME}:latest
+                    EOF
                     """
                 }
             }
         }
 
-
-      stage('Health Check') {
+        stage('Health Check') {
             steps {
                 sh """
-                sleep 20
+                sleep 30
                 curl http://${EC2_HOST}:8080
                 """
             }
         }
-    }  
+    }
 
- post {
-
+    post {
 
         success {
             echo 'Application deployed successfully.'
         }
+
         failure {
             echo 'Pipeline failed.'
         }
+
         always {
             cleanWs()
         }
     }
-
-
 }
+
+
