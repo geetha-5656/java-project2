@@ -35,7 +35,8 @@ AWS_REGION = 'ap-south-1'
             steps {
                 echo 'Running unit tests...'
                 sh 'mvn test -DskipTests'
-            }
+            
+}
         }
 
         stage('Archive Artifact') {
@@ -79,32 +80,27 @@ AWS_REGION = 'ap-south-1'
             }
         }
 
-        stage('Deploy to EC2') {
-            steps {
-                sshagent(credentials: ['application-server']) {
+       stage('Deploy to EC2') {
+    steps {
+        sshagent(credentials: ['application-server']) {
+            sh """
+ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
+aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin 832569409044.dkr.ecr.ap-south-1.amazonaws.com
 
-                    sh """
-                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << EOF
-                    set -e
+docker pull ${IMAGE_NAME}:latest
 
-                    aws ecr get-login-password --region ${AWS_REGION} | \
-                    docker login --username AWS --password-stdin 832569409044.dkr.ecr.ap-south-1.amazonaws.com
+docker stop petclinic || true
+docker rm petclinic || true
 
-                    docker pull ${IMAGE_NAME}:latest
-
-                    docker stop petclinic || true
-                    docker rm petclinic || true
-
-                    docker run -d \
-                      --name petclinic \
-                      -p 8080:8080 \
-                      --restart always \
-                      ${IMAGE_NAME}:latest
-                    EOF
-                    """
-                }
-            }
+docker run -d --name petclinic \
+-p 8080:8080 \
+--restart always \
+${IMAGE_NAME}:latest
+EOF
+"""
         }
+    }
+}
 
         stage('Health Check') {
             steps {
