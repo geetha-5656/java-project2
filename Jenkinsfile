@@ -7,7 +7,7 @@ pipeline{
            IMAGE_TAG = "${BUILD_NUMBER}"
 
 
-           EC2_HOST = "13.201.122.43"
+           EC2_HOST = "13.201.204.209"
            EC2_USER = "ubuntu"
            }
 
@@ -33,6 +33,7 @@ pipeline{
                 echo "Running unit tests..."
                 sh 'mvn test -DskipTests'
             }
+
  
 }
 
@@ -100,6 +101,7 @@ pipeline{
     }  
 
  post {
+
 
         success {
             echo 'Application deployed successfully.'
