@@ -15,7 +15,8 @@ pipeline{
                stage ('Checkout'){
                 steps{
                   echo "Checking out source code.."
-                  git url: 'https://github.com/geetha-5656/java-project2.git'
+                  git branch: 'main',
+                      url: 'https://github.com/geetha-5656/java-project2.git'
                   }
             }
             
@@ -32,7 +33,8 @@ pipeline{
                 echo "Running unit tests..."
                 sh 'mvn test'
             }
-        }
+ 
+}
 
          stage('Archive Artifact') {
             steps {
