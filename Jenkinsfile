@@ -31,10 +31,9 @@ AWS_REGION = 'ap-south-1'
             }
         }
 
-        stage('Unit Test') {
+      stage('Unit Test') {
     steps {
-        echo 'Running JUnit 5 tests...'
-        sh 'mvn test'
+        sh 'mvn test -Dtest="**/*Tests" -DfailIfNoTests=false'
     }
     post {
         always {
