@@ -31,9 +31,10 @@ AWS_REGION = 'ap-south-1'
             }
         }
 
-      stage('Unit Test') {
+stage('Unit Test') {
     steps {
-        sh 'mvn test -Dtest="**/*Tests" -DfailIfNoTests=false'
+        echo 'Running JUnit unit tests...'
+        sh 'mvn test -Dtest="!MySqlIntegrationTests"'
     }
     post {
         always {
