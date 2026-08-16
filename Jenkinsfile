@@ -32,12 +32,16 @@ AWS_REGION = 'ap-south-1'
         }
 
         stage('Unit Test') {
-            steps {
-                echo 'Running unit tests...'
-                sh 'mvn test -DskipTests'
-            
-}
+    steps {
+        echo 'Running JUnit 5 tests...'
+        sh 'mvn test'
+    }
+    post {
+        always {
+            junit 'target/surefire-reports/*.xml'
         }
+    }
+}
 
         stage('Archive Artifact') {
             steps {
