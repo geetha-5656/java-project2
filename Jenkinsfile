@@ -6,7 +6,7 @@ pipeline {
 
     environment {
         AWS_REGION = 'ap-south-1'
-        IMAGE_NAME = '832569409044.dkr.ecr.ap-south-1.amazonaws.com/petclinic-java-project'
+        IMAGE_NAME = '351245513944.dkr.ecr.ap-south-1.amazonaws.com/petclinic-java-project'
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
@@ -62,8 +62,14 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                    echo "Building Docker image..."
+
+                    docker build \
+                        -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+                    docker tag \
+                        ${IMAGE_NAME}:${IMAGE_TAG} \
+                        ${IMAGE_NAME}:latest
                 """
             }
         }
@@ -71,9 +77,14 @@ pipeline {
         stage('Login to Amazon ECR') {
             steps {
                 sh """
-                    aws ecr get-login-password --region ${AWS_REGION} | \
-                    docker login --username AWS --password-stdin \
-                    832569409044.dkr.ecr.ap-south-1.amazonaws.com
+                    echo "Logging in to private ECR..."
+
+                    aws ecr get-login-password \
+                        --region ${AWS_REGION} | \
+                    docker login \
+                        --username AWS \
+                        --password-stdin \
+                        351245513944.dkr.ecr.ap-south-1.amazonaws.com
                 """
             }
         }
@@ -81,7 +92,10 @@ pipeline {
         stage('Push Docker Image to ECR') {
             steps {
                 sh """
+                    echo "Pushing image to ECR..."
+
                     docker push ${IMAGE_NAME}:${IMAGE_TAG}
+
                     docker push ${IMAGE_NAME}:latest
                 """
             }
@@ -91,11 +105,17 @@ pipeline {
     post {
 
         success {
-            echo 'Application image successfully built and pushed to ECR.'
+            echo '=========================================='
+            echo 'Pipeline completed successfully!'
+            echo 'Application image built and pushed to ECR.'
+            echo '=========================================='
         }
 
         failure {
+            echo '=========================================='
             echo 'Pipeline failed.'
+            echo 'Check the failed stage in the Jenkins console.'
+            echo '=========================================='
         }
 
         always {
@@ -103,3 +123,5 @@ pipeline {
         }
     }
 }
+
+       
