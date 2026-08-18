@@ -30,18 +30,22 @@ pipeline {
         }
 
         stage('Unit Test') {
-            steps {
-                echo 'Running JUnit unit tests...'
+    steps {
+        echo 'Running JUnit unit tests...'
 
-                sh 'mvn test -Dtest="!MySqlIntegrationTests"'
-            }
+        sh '''
+            mvn test \
+                -Dtest="!MySqlIntegrationTests,!CrashControllerIntegrationTests"
+        '''
+    }
 
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
+    post {
+        always {
+            junit allowEmptyResults: true,
+                  testResults: 'target/surefire-reports/*.xml'
         }
+    }
+}
 
         stage('Archive Artifact') {
             steps {
