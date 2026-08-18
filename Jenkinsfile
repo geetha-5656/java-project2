@@ -29,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
+       stage('Unit Test') {
     steps {
         echo 'Running JUnit unit tests...'
 
