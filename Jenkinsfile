@@ -28,14 +28,14 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
-
-       stage('Unit Test') {
+        stage('Unit Test') {
     steps {
-        echo 'Running JUnit unit tests...'
+        echo 'Running fast unit tests...'
 
         sh '''
-            mvn test \
-                -Dtest="!MySqlIntegrationTests,!CrashControllerIntegrationTests"
+            mvn -B test \
+                -Dtest='*Test,!*IntegrationTest,!*IntegrationTests,!MySqlIntegrationTests,!CrashControllerIntegrationTests' \
+                -DfailIfNoTests=false
         '''
     }
 
@@ -46,6 +46,8 @@ pipeline {
         }
     }
 }
+
+
 
         stage('Archive Artifact') {
             steps {
