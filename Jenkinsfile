@@ -57,13 +57,13 @@ pipeline {
         }
 
         stage('Upload Artifact to S3') {
-            steps {
-                sh """
-                    aws s3 cp target/*.jar \
-                    s3://every-build-artifacts/petclinic/build-${BUILD_NUMBER}.jar
-                """
-            }
-        }
+    steps {
+        sh """
+            aws s3 cp target/*.jar \
+            s3://geetha-jenkins-artifacts-351245513944/petclinic/build-${BUILD_NUMBER}.jar
+        """
+    }
+}
 
         stage('Docker Build') {
             steps {
